@@ -5,9 +5,9 @@ class Conexion {
         // Revisa que estos datos sean correctos para tu XAMPP.
         
         $host = 'localhost';        // Generalmente es 'localhost'
-        $dbname = 'u593518503_cursodealturas';    // El nombre de tu base de datos
-        $user = 'u593518503_administrador';             // El usuario por defecto de XAMPP es 'root'
-        $password = '7j/5W+phyxSW';             // La contraseña por defecto de XAMPP es vacía ''
+        $dbname = 'cursoaltura';    // El nombre de tu base de datos
+        $user = 'root';             // El usuario por defecto de XAMPP es 'root'
+        $password = '';             // La contraseña por defecto de XAMPP es vacía ''
         
         // -----------------------------------------
 

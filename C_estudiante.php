@@ -94,7 +94,6 @@ class ControladorEstudiante {
     public function verCurso() {
         $curso_id = $_GET['id'] ?? 0;
         $data['curso'] = $this->modelo->getCursoPorId($curso_id);
-        
         if (!$data['curso']) {
             die("Curso no encontrado.");
         }
@@ -103,15 +102,54 @@ class ControladorEstudiante {
         $num_doc = $_SESSION['usuario_numero_documento'];
 
         $data['titulo'] = $data['curso']['nombre'];
-        // Pasamos los datos del estudiante para obtener el progreso individual
         $data['fases'] = $this->modelo->getContenidoCurso($curso_id, $tipo_doc, $num_doc);
-
-        // Verificamos el progreso y lo pasamos a la vista
-        $progreso = $this->modelo->getProgresoCurso($curso_id, $tipo_doc, $num_doc);
-        $data['progreso'] = $progreso;
-        $data['curso_completado'] = ($progreso['total_clases'] > 0 && $progreso['total_clases'] === $progreso['clases_completadas']);
+        
+        // --- ESTA ES LA LÍNEA QUE SOLUCIONA EL ERROR ---
+        $data['curso_aprobado'] = $this->modelo->verificarAprobacionCurso($curso_id, $tipo_doc, $num_doc);
         
         require_once 'views/V_estudiante_ver_curso.php';
+    }
+
+    public function presentarEvaluacion() {
+        $evaluacion_id = $_GET['eval_id'] ?? 0;
+        $curso_id = $_GET['curso_id'] ?? 0;
+
+        $data['evaluacion'] = $this->modelo->getEvaluacionParaPresentar($evaluacion_id);
+        if (empty($data['evaluacion'])) die("Evaluación no encontrada.");
+
+        $data['titulo'] = $data['evaluacion']['titulo'];
+        $data['curso_id'] = $curso_id;
+        require_once 'views/V_estudiante_presentar_evaluacion.php';
+    }
+
+    /**
+     * NUEVO: Procesa las respuestas de la evaluación.
+     */
+    public function enviarEvaluacion() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $evaluacion_id = $_POST['evaluacion_id'];
+            $curso_id = $_POST['curso_id'];
+            $respuestas = $_POST['respuestas'] ?? [];
+
+            $resultado = $this->modelo->calcularPuntaje($evaluacion_id, $respuestas);
+            
+            $this->modelo->guardarResultadoEvaluacion(
+                $evaluacion_id,
+                $_SESSION['usuario_tipo_documento'],
+                $_SESSION['usuario_numero_documento'],
+                $resultado,
+                json_encode($respuestas)
+            );
+
+            if ($resultado['puntaje'] >= 80) {
+                $_SESSION['mensaje'] = "¡Felicidades! Aprobaste la evaluación con un " . $resultado['puntaje'] . "%.";
+            } else {
+                $_SESSION['error'] = "Tu puntaje fue de " . $resultado['puntaje'] . "%. Necesitas 80% para aprobar. ¡Puedes intentarlo de nuevo!";
+            }
+
+            header('Location: index.php?c=estudiante&a=verCurso&id=' . $curso_id);
+            exit();
+        }
     }
     
     
@@ -120,19 +158,16 @@ class ControladorEstudiante {
         $tipo_doc = $_SESSION['usuario_tipo_documento'];
         $num_doc = $_SESSION['usuario_numero_documento'];
 
-        // Doble verificación: ¿El curso está completo?
-        $progreso = $this->modelo->getProgresoCurso($curso_id, $tipo_doc, $num_doc);
-        $completado = ($progreso['total_clases'] > 0 && $progreso['clases_completadas'] === $progreso['total_clases']);
-
-        if ($curso_id && $completado) {
-            // Verificar si ya existe un certificado para no duplicar
+        if ($this->modelo->verificarAprobacionCurso($curso_id, $tipo_doc, $num_doc)) {
             $certificado_existente = $this->modelo->getCertificado($tipo_doc, $num_doc, $curso_id);
             if (!$certificado_existente) {
                 $this->modelo->crearCertificado($tipo_doc, $num_doc, $curso_id);
             }
+            header('Location: index.php?c=estudiante&a=verCertificado&curso_id=' . $curso_id);
+        } else {
+            $_SESSION['error'] = "Debes completar todas las clases y aprobar todas las evaluaciones para generar el certificado.";
+            header('Location: index.php?c=estudiante&a=verCurso&id=' . $curso_id);
         }
-        // Redirigir siempre a la vista del certificado
-        header('Location: index.php?c=estudiante&a=verCertificado&curso_id=' . $curso_id);
         exit();
     }
     

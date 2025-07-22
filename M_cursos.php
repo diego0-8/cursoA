@@ -198,6 +198,93 @@ class ModeloCursos {
         return $consulta->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function getEvaluacionPorFaseId($fase_id) {
+        $sql = "SELECT * FROM evaluaciones WHERE fase_id = :fase_id";
+        $consulta = $this->db->prepare($sql);
+        $consulta->execute([':fase_id' => $fase_id]);
+        return $consulta->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getEvaluacionCompleta($evaluacion_id) {
+        $evaluacion = $this->db->prepare("SELECT * FROM evaluaciones WHERE id = :id");
+        $evaluacion->execute([':id' => $evaluacion_id]);
+        $data['evaluacion'] = $evaluacion->fetch(PDO::FETCH_ASSOC);
+
+        if (!$data['evaluacion']) return null;
+
+        $preguntas = $this->db->prepare("SELECT * FROM evaluacion_preguntas WHERE evaluacion_id = :evaluacion_id ORDER BY orden ASC");
+        $preguntas->execute([':evaluacion_id' => $evaluacion_id]);
+        $data['preguntas'] = $preguntas->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($data['preguntas'] as $key => $pregunta) {
+            $opciones = $this->db->prepare("SELECT * FROM evaluacion_opciones WHERE pregunta_id = :pregunta_id");
+            $opciones->execute([':pregunta_id' => $pregunta['id']]);
+            $data['preguntas'][$key]['opciones'] = $opciones->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Crea una nueva evaluación y devuelve su ID.
+     */
+    public function crearEvaluacion($fase_id, $titulo) {
+        $sql = "INSERT INTO evaluaciones (fase_id, titulo) VALUES (:fase_id, :titulo)";
+        $consulta = $this->db->prepare($sql);
+        $consulta->execute([':fase_id' => $fase_id, ':titulo' => $titulo]);
+        return $this->db->lastInsertId();
+    }
+
+    /**
+     * Crea una nueva pregunta y devuelve su ID.
+     */
+    public function crearPregunta($evaluacion_id, $texto_pregunta, $orden) {
+        $sql = "INSERT INTO evaluacion_preguntas (evaluacion_id, texto_pregunta, orden) VALUES (:evaluacion_id, :texto_pregunta, :orden)";
+        $consulta = $this->db->prepare($sql);
+        $consulta->execute([
+            ':evaluacion_id' => $evaluacion_id,
+            ':texto_pregunta' => $texto_pregunta,
+            ':orden' => $orden
+        ]);
+        return $this->db->lastInsertId();
+    }
+
+    /**
+     * Crea una opción para una pregunta.
+     */
+    public function crearOpcion($pregunta_id, $texto_opcion, $es_correcta) {
+        $sql = "INSERT INTO evaluacion_opciones (pregunta_id, texto_opcion, es_correcta) VALUES (:pregunta_id, :texto_opcion, :es_correcta)";
+        $consulta = $this->db->prepare($sql);
+        $consulta->execute([
+            ':pregunta_id' => $pregunta_id,
+            ':texto_opcion' => $texto_opcion,
+            ':es_correcta' => $es_correcta
+        ]);
+    }
+
+    public function getFasePorId($fase_id) {
+    $consulta = $this->db->prepare("SELECT * FROM fases WHERE id = :id");
+    $consulta->execute([':id' => $fase_id]);
+    return $consulta->fetch(PDO::FETCH_ASSOC);
+}
+
+public function getEvaluacionCompletaPorFase($fase_id) {
+    $evaluacion = $this->getEvaluacionPorFaseId($fase_id);
+    if ($evaluacion) {
+        return $this->getEvaluacionCompleta($evaluacion['id']);
+    }
+    return null;
+}
+
+    /**
+     * Elimina una evaluación y todas sus preguntas/opciones asociadas.
+     */
+    public function eliminarEvaluacionExistente($evaluacion_id) {
+        $sql = "DELETE FROM evaluaciones WHERE id = :evaluacion_id";
+        $consulta = $this->db->prepare($sql);
+        $consulta->execute([':evaluacion_id' => $evaluacion_id]);
+    }
+
     /**
      * NUEVO: Elimina un recurso de la base de datos.
      */

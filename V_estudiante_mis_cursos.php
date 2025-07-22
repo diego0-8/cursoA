@@ -72,34 +72,14 @@
                             <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
                                 <div class="bg-brand-lime h-2.5 rounded-full" style="width: <?php echo $porcentaje; ?>%"></div>
                             </div>
-                            <?php if ($porcentaje_redondeado == 100): ?>
-                                <p class="text-xs text-green-600 font-bold mb-6"><i class="fas fa-check-circle mr-1"></i>Curso Completado</p>
-                            <?php else: ?>
-                                <p class="text-xs text-gray-500 mb-6">Progreso: <?php echo $porcentaje_redondeado; ?>%</p>
-                            <?php endif; ?>
+                            <p class="text-xs text-gray-500 mb-6">Progreso de clases: <?php echo $porcentaje_redondeado; ?>%</p>
                             
-                            <!-- INICIO: Lógica para mostrar botón de examen o de acceso -->
+                            <!-- Lógica de botones SIMPLIFICADA -->
                             <div class="mt-auto">
-                                <?php if ($porcentaje_redondeado == 100 && !empty($curso['enlace_evaluacion'])): ?>
-                                    <a href="<?php echo htmlspecialchars($curso['enlace_evaluacion']); ?>" target="_blank" class="block w-full text-center bg-brand-lime hover:bg-brand-lime-dark text-white font-bold py-3 px-4 rounded-lg transition-colors">
-                                        <i class="fas fa-award mr-2"></i>Realizar Evaluación
-                                    </a>
-                                <?php else: ?>
-                                    <a href="index.php?c=estudiante&a=verCurso&id=<?php echo $curso['id']; ?>" class="block w-full text-center bg-brand-dark-green hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-lg transition-colors">
-                                        <i class="fas fa-arrow-right mr-2"></i>Acceder al Curso
-                                    </a>
-                                <?php endif; ?>
-                                <?php if ($porcentaje_redondeado == 100 && !empty($curso['certificado'])): ?>
-                                    <a href="index.php?c=estudiante&a=verCertificado&curso_id=<?php echo $curso['id']; ?>" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
-                                        <i class="fas fa-certificate mr-2"></i>Ver Certificado
-                                    </a>
-                                <?php else: ?>
-                                    <a href="index.php?c=estudiante&a=generarCertificado&curso_id=<?php echo $curso['id']; ?>" class="block w-full text-center bg-brand-lime hover:bg-brand-lime-dark text-white font-bold py-3 px-4 rounded-lg transition-colors">
-                                        <i class="fas fa-award mr-2"></i>Generar Certificado
-                                    </a>
-                                <?php endif; ?>
+                                <a href="index.php?c=estudiante&a=verCurso&id=<?php echo $curso['id']; ?>" class="block w-full text-center bg-brand-dark-green hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                                    <i class="fas fa-arrow-right mr-2"></i>Acceder al Curso
+                                </a>
                             </div>
-                            <!-- FIN: Lógica de botones -->
                         </div>
                     </div>
                 <?php endforeach; ?>

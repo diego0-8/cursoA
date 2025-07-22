@@ -64,8 +64,15 @@
             <div class="space-y-4">
                 <?php foreach ($data['fases'] as $fase): ?>
                     <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                        <h2 class="text-2xl font-bold text-brand-dark-green p-6 border-b"><?php echo htmlspecialchars($fase['nombre']); ?></h2>
-                        <div class="p-6 space-y-6">
+                        <!-- CAMBIO: Encabezado del módulo ahora incluye el botón de evaluación -->
+                        <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+                            <h2 class="text-2xl font-bold text-brand-dark-green"><?php echo htmlspecialchars($fase['nombre']); ?></h2>
+                            <a href="index.php?c=profesor&a=gestionarEvaluacion&fase_id=<?php echo $fase['id']; ?>" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">
+                                <i class="fas fa-file-signature mr-2"></i>Gestionar Evaluación
+                            </a>
+                        </div>
+
+                        <div class="p-6 space-y-6">                            
                             <!-- Formulario para añadir clase -->
                             <div class="bg-gray-50 p-4 rounded-lg border">
                                  <h3 class="text-lg font-semibold text-gray-700 mb-3">Añadir Nueva Clase</h3>
@@ -76,44 +83,31 @@
                                  </form>
                             </div>
                             <!-- Lista de clases -->
-                            <?php foreach ($fase['clases'] as $clase): ?>
-                                <div class="border rounded-lg p-4">
-                                    <div class="flex justify-between items-center mb-4">
-                                        <h3 class="text-lg font-semibold text-gray-800"><?php echo htmlspecialchars($clase['titulo']); ?></h3>
-                                        <button onclick="openUploadModal(<?php echo $clase['id']; ?>)" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg text-sm"><i class="fas fa-upload mr-2"></i>Añadir Recurso</button>
+                            <?php if (empty($fase['clases'])): ?>
+                                <p class="text-gray-500 text-center italic py-4">Aún no hay clases en este módulo.</p>
+                            <?php else: ?>
+                                <?php foreach ($fase['clases'] as $clase): ?>
+                                    <div class="border rounded-lg p-4">
+                                        <div class="flex justify-between items-center mb-4">
+                                            <h3 class="text-lg font-semibold text-gray-800"><?php echo htmlspecialchars($clase['titulo']); ?></h3>
+                                            <button onclick="openUploadModal(<?php echo $clase['id']; ?>)" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg text-sm"><i class="fas fa-upload mr-2"></i>Añadir Recurso</button>
+                                        </div>
+                                        <?php if (empty($clase['recursos'])): ?>
+                                            <p class="text-gray-500 text-sm italic">No hay recursos en esta clase.</p>
+                                        <?php else: ?>
+                                            <ul class="space-y-2">
+                                                <?php foreach ($clase['recursos'] as $recurso): ?>
+                                                    <li class="flex items-center justify-between p-2 bg-gray-50 rounded-md text-sm">
+                                                        <a href="<?php echo htmlspecialchars($recurso['ruta_archivo']); ?>" target="_blank" class="text-blue-600 hover:underline"><i class="fas fa-file-alt mr-2"></i><?php echo htmlspecialchars($recurso['nombre_original']); ?></a>
+                                                        <a href="index.php?c=profesor&a=eliminarRecurso&id=<?php echo $recurso['id']; ?>&curso_id=<?php echo $data['curso']['id']; ?>" onclick="return confirm('¿Estás seguro?')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></a>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php endif; ?>
+                                        <!-- CAMBIO: Se eliminó el formulario de enlace a Google Forms por clase para evitar redundancia -->
                                     </div>
-                                    <?php if (empty($clase['recursos'])): ?>
-                                        <p class="text-gray-500 text-sm italic">No hay recursos en esta clase.</p>
-                                    <?php else: ?>
-                                        <ul class="space-y-2">
-                                            <?php foreach ($clase['recursos'] as $recurso): ?>
-                                                <li class="flex items-center justify-between p-2 bg-gray-50 rounded-md text-sm">
-                                                    <a href="<?php echo htmlspecialchars($recurso['ruta_archivo']); ?>" target="_blank" class="text-blue-600 hover:underline"><i class="fas fa-file-alt mr-2"></i><?php echo htmlspecialchars($recurso['nombre_original']); ?></a>
-                                                    <a href="index.php?c=profesor&a=eliminarRecurso&id=<?php echo $recurso['id']; ?>&curso_id=<?php echo $data['curso']['id']; ?>" onclick="return confirm('¿Estás seguro?')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></a>
-                                                </li>
-                                            <?php endforeach; ?>
-                                        </ul>
-                                    <?php endif; ?>
-                                     <!-- Formulario para Enlace de Evaluación por Clase -->
-                                    <div class="bg-gray-50 p-4 rounded-lg border mt-4">
-                                        <h3 class="text-md font-semibold text-gray-700 mb-3">Evaluación de la Clase</h3>
-                                        <form action="index.php?c=profesor&a=actualizarEnlaceEvaluacion" method="POST">
-                                            <label for="enlace_evaluacion_<?php echo $clase['id']; ?>" class="block text-sm font-medium text-gray-700 mb-2">Enlace de Evaluación (Google Forms)</label>
-                                            <div class="flex items-center gap-4">
-                                                <input type="hidden" name="curso_id" value="<?php echo $data['curso']['id']; ?>">
-                                                <input type="hidden" name="clase_id_evaluacion" value="<?php echo $clase['id']; ?>">
-                                                <input type="url" name="enlace_evaluacion" id="enlace_evaluacion_<?php echo $clase['id']; ?>" 
-                                                       value="<?php echo htmlspecialchars($clase['enlace_evaluacion'] ?? ''); ?>" 
-                                                       placeholder="Pega aquí el enlace de la evaluación de esta clase" 
-                                                       class="flex-grow p-2 border rounded-md">
-                                                <button type="submit" class="bg-brand-lime hover:bg-brand-lime-dark text-white font-bold py-2 px-4 rounded-lg text-sm">
-                                                    <i class="fas fa-save mr-2"></i>Guardar
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -138,8 +132,16 @@
 
     <script>
         const modal = document.getElementById('upload-modal');
-        function openUploadModal(claseId) { document.getElementById('modal-clase-id').value = claseId; modal.classList.remove('hidden'); modal.classList.add('flex'); }
-        function closeUploadModal() { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+        const modalClaseIdInput = document.getElementById('modal-clase-id');
+        function openUploadModal(claseId) {
+            modalClaseIdInput.value = claseId;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        function closeUploadModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
     </script>
 </body>
 </html>

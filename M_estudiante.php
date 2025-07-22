@@ -159,39 +159,157 @@ class ModeloEstudiante {
 
     
     public function getContenidoCurso($curso_id, $tipo_doc, $num_doc) {
-    $sql_fases = "SELECT * FROM fases WHERE curso_id = :curso_id ORDER BY orden ASC";
-    $consulta_fases = $this->db->prepare($sql_fases);
-    $consulta_fases->execute([':curso_id' => $curso_id]);
-    $fases = $consulta_fases->fetchAll(PDO::FETCH_ASSOC);
+        $sql_fases = "SELECT f.*, e.id as evaluacion_id, e.titulo as evaluacion_titulo
+                      FROM fases f
+                      LEFT JOIN evaluaciones e ON f.id = e.fase_id
+                      WHERE f.curso_id = :curso_id ORDER BY f.orden ASC";
+        $consulta_fases = $this->db->prepare($sql_fases);
+        $consulta_fases->execute([':curso_id' => $curso_id]);
+        $fases = $consulta_fases->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($fases as $key_fase => $fase) {
-        // Unimos la tabla de clases con la de progreso para saber qué está completado
-        $sql_clases = "SELECT 
-                            c.*, 
-                            p.completado 
-                       FROM clases c
-                       LEFT JOIN progreso_estudiante p ON c.id = p.clase_id 
-                            AND p.estudiante_tipo_documento = :tipo_doc 
-                            AND p.estudiante_numero_documento = :num_doc
-                       WHERE c.fase_id = :fase_id 
-                       ORDER BY c.orden ASC";
-        
-        $consulta_clases = $this->db->prepare($sql_clases);
-        $consulta_clases->execute([
-            ':fase_id' => $fase['id'],
-            ':tipo_doc' => $tipo_doc,
-            ':num_doc' => $num_doc
-        ]);
-        $clases = $consulta_clases->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Bucle para obtener los recursos de cada clase
-        foreach ($clases as $key_clase => $clase) {
-            $clases[$key_clase]['recursos'] = $this->getRecursosPorClase($clase['id']);
+        foreach ($fases as $key_fase => $fase) {
+            // Clases del módulo
+            $sql_clases = "SELECT c.*, p.completado 
+                           FROM clases c
+                           LEFT JOIN progreso_estudiante p ON c.id = p.clase_id AND p.estudiante_numero_documento = :num_doc
+                           WHERE c.fase_id = :fase_id ORDER BY c.orden ASC";
+            $consulta_clases = $this->db->prepare($sql_clases);
+            $consulta_clases->execute([':fase_id' => $fase['id'], ':num_doc' => $num_doc]);
+            $clases = $consulta_clases->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Recursos de cada clase
+            foreach ($clases as $key_clase => $clase) {
+                $clases[$key_clase]['recursos'] = $this->getRecursosPorClase($clase['id']);
+            }
+            $fases[$key_fase]['clases'] = $clases;
+
+            // Progreso y estado de la evaluación del módulo
+            $fases[$key_fase]['progreso_clases'] = $this->getProgresoFase($fase['id'], $tipo_doc, $num_doc);
+            if ($fase['evaluacion_id']) {
+                $fases[$key_fase]['resultado_evaluacion'] = $this->getMejorResultado($fase['evaluacion_id'], $tipo_doc, $num_doc);
+            } else {
+                $fases[$key_fase]['resultado_evaluacion'] = null;
+            }
         }
-        $fases[$key_fase]['clases'] = $clases;
+        return $fases;
     }
-    return $fases;
-}
+
+    public function getProgresoFase($fase_id, $tipo_doc, $num_doc) {
+        $sql_total = "SELECT COUNT(id) FROM clases WHERE fase_id = :fase_id";
+        $q_total = $this->db->prepare($sql_total);
+        $q_total->execute([':fase_id' => $fase_id]);
+        $total = $q_total->fetchColumn();
+
+        $sql_completadas = "SELECT COUNT(p.id) FROM progreso_estudiante p JOIN clases c ON p.clase_id = c.id WHERE c.fase_id = :fase_id AND p.estudiante_numero_documento = :num_doc AND p.completado = 1";
+        $q_completadas = $this->db->prepare($sql_completadas);
+        $q_completadas->execute([':fase_id' => $fase_id, ':num_doc' => $num_doc]);
+        $completadas = $q_completadas->fetchColumn();
+
+        return ['total' => (int)$total, 'completadas' => (int)$completadas];
+    }
+
+    public function getMejorResultado($evaluacion_id, $tipo_doc, $num_doc) {
+        $sql = "SELECT MAX(puntaje) as mejor_puntaje FROM evaluacion_resultados WHERE evaluacion_id = :eval_id AND estudiante_numero_documento = :num_doc";
+        $consulta = $this->db->prepare($sql);
+        $consulta->execute([':eval_id' => $evaluacion_id, ':num_doc' => $num_doc]);
+        return $consulta->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * NUEVO: Obtiene los datos de una evaluación para que el estudiante la realice.
+     */
+    public function getEvaluacionParaPresentar($evaluacion_id) {
+        $sql = "SELECT e.id, e.titulo, p.id as pregunta_id, p.texto_pregunta, o.id as opcion_id, o.texto_opcion
+                FROM evaluaciones e
+                JOIN evaluacion_preguntas p ON e.id = p.evaluacion_id
+                JOIN evaluacion_opciones o ON p.id = o.pregunta_id
+                WHERE e.id = :eval_id ORDER BY p.orden, o.id";
+        $consulta = $this->db->prepare($sql);
+        $consulta->execute([':eval_id' => $evaluacion_id]);
+        $resultados = $consulta->fetchAll(PDO::FETCH_ASSOC);
+
+        // Agrupar resultados en un formato útil
+        $evaluacion = [];
+        if (!empty($resultados)) {
+            $evaluacion['id'] = $resultados[0]['id'];
+            $evaluacion['titulo'] = $resultados[0]['titulo'];
+            $evaluacion['preguntas'] = [];
+            foreach ($resultados as $row) {
+                $evaluacion['preguntas'][$row['pregunta_id']]['id'] = $row['pregunta_id'];
+                $evaluacion['preguntas'][$row['pregunta_id']]['texto_pregunta'] = $row['texto_pregunta'];
+                $evaluacion['preguntas'][$row['pregunta_id']]['opciones'][] = ['id' => $row['opcion_id'], 'texto' => $row['texto_opcion']];
+            }
+        }
+        return $evaluacion;
+    }
+
+    /**
+     * NUEVO: Calcula el puntaje de una evaluación enviada.
+     */
+    public function calcularPuntaje($evaluacion_id, $respuestas) {
+        $sql = "SELECT pregunta_id, id FROM evaluacion_opciones WHERE es_correcta = 1 AND pregunta_id IN (SELECT id FROM evaluacion_preguntas WHERE evaluacion_id = :eval_id)";
+        $consulta = $this->db->prepare($sql);
+        $consulta->execute([':eval_id' => $evaluacion_id]);
+        $correctas = $consulta->fetchAll(PDO::FETCH_KEY_PAIR); // [pregunta_id => opcion_id_correcta]
+
+        $puntaje = 0;
+        $total_preguntas = count($correctas);
+        $respuestas_correctas = 0;
+
+        foreach ($respuestas as $pregunta_id => $opcion_id) {
+            if (isset($correctas[$pregunta_id]) && $correctas[$pregunta_id] == $opcion_id) {
+                $respuestas_correctas++;
+            }
+        }
+
+        if ($total_preguntas > 0) {
+            $puntaje = ($respuestas_correctas / $total_preguntas) * 100;
+        }
+
+        return [
+            'puntaje' => round($puntaje, 2),
+            'total_preguntas' => $total_preguntas,
+            'respuestas_correctas' => $respuestas_correctas
+        ];
+    }
+
+    /**
+     * NUEVO: Guarda el resultado de un intento de evaluación.
+     */
+    public function guardarResultadoEvaluacion($evaluacion_id, $tipo_doc, $num_doc, $resultado, $respuestas_json) {
+        $sql = "INSERT INTO evaluacion_resultados (evaluacion_id, estudiante_tipo_documento, estudiante_numero_documento, puntaje, total_preguntas, respuestas_correctas, respuestas_json)
+                VALUES (:eval_id, :tipo_doc, :num_doc, :puntaje, :total, :correctas, :json)";
+        $consulta = $this->db->prepare($sql);
+        $consulta->execute([
+            ':eval_id' => $evaluacion_id,
+            ':tipo_doc' => $tipo_doc,
+            ':num_doc' => $num_doc,
+            ':puntaje' => $resultado['puntaje'],
+            ':total' => $resultado['total_preguntas'],
+            ':correctas' => $resultado['respuestas_correctas'],
+            ':json' => $respuestas_json
+        ]);
+    }
+    
+    /**
+     * NUEVO: Verifica si un estudiante ha aprobado todos los módulos de un curso.
+     */
+    public function verificarAprobacionCurso($curso_id, $tipo_doc, $num_doc) {
+        $contenido = $this->getContenidoCurso($curso_id, $tipo_doc, $num_doc);
+        if (empty($contenido)) return false;
+
+        foreach ($contenido as $fase) {
+            // Condición 1: Todas las clases del módulo deben estar completas.
+            if ($fase['progreso_clases']['total'] > 0 && $fase['progreso_clases']['completadas'] < $fase['progreso_clases']['total']) {
+                return false; // Faltan clases por completar
+            }
+            // Condición 2: Si el módulo tiene evaluación, debe estar aprobada con 80 o más.
+            if ($fase['evaluacion_id'] && (!isset($fase['resultado_evaluacion']['mejor_puntaje']) || $fase['resultado_evaluacion']['mejor_puntaje'] < 80)) {
+                return false; // La evaluación no ha sido aprobada
+            }
+        }
+        return true; // Si pasa todas las validaciones, el curso está aprobado.
+    }
 
     
     public function getRecursosPorClase($clase_id) {

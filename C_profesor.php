@@ -41,7 +41,9 @@ class ControladorProfesor {
         }
         $data['titulo'] = 'Gestionar: ' . htmlspecialchars($data['curso']['nombre']);
         $data['fases'] = $this->modeloCursos->getFasesPorCurso($curso_id);
-        require_once 'views/V_profesor_cursos.php';
+        
+       
+        require_once 'views/V_profesor_gestionar_curso.php';
     }
 
     public function actualizarEnlaceEvaluacion() {
@@ -148,7 +150,73 @@ class ControladorProfesor {
     }
 
     
+     /**
+     * Muestra la interfaz para crear o editar una evaluación para un módulo (fase).
+     */
+    public function gestionarEvaluacion() {
+        $fase_id = $_GET['fase_id'] ?? 0;
+        if (!$fase_id) die("Error: ID de módulo no especificado.");
 
+        // Obtenemos la información del curso y la fase para la vista
+        $data['fase_info'] = $this->modeloCursos->getFasePorId($fase_id); // Necesitarás crear este método en M_cursos
+        $data['curso_info'] = $this->modeloCursos->getCursoPorId($data['fase_info']['curso_id']);
+
+        // Verificar permisos del profesor
+        if ($data['curso_info']['profesor_numero_documento'] != $_SESSION['usuario_numero_documento']) {
+            die("Acceso denegado.");
+        }
+
+        $data['titulo'] = 'Gestionar Evaluación';
+        $data['evaluacion_existente'] = $this->modeloCursos->getEvaluacionCompletaPorFase($fase_id); // Necesitarás crear este método
+        
+        require_once 'views/V_profesor_gestionar_evaluacion.php';
+    }
+
+    /**
+     * Guarda los datos de una evaluación (preguntas y opciones de selección múltiple).
+     */
+    public function guardarEvaluacion() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $fase_id = $_POST['fase_id'];
+            $titulo_evaluacion = $_POST['titulo_evaluacion'];
+            $preguntas = $_POST['pregunta'];
+            $opciones = $_POST['opciones'];
+            $correctas = $_POST['correcta'];
+
+            // Para simplificar, eliminamos la evaluación anterior si existe y creamos una nueva.
+            $evaluacion_existente = $this->modeloCursos->getEvaluacionPorFaseId($fase_id);
+            if ($evaluacion_existente) {
+                $this->modeloCursos->eliminarEvaluacionExistente($evaluacion_existente['id']);
+            }
+
+            // Crear la nueva evaluación
+            $evaluacion_id = $this->modeloCursos->crearEvaluacion($fase_id, $titulo_evaluacion);
+
+            // Recorrer y guardar cada pregunta y sus opciones
+            foreach ($preguntas as $orden => $texto_pregunta) {
+                if (!empty($texto_pregunta)) {
+                    $pregunta_id = $this->modeloCursos->crearPregunta($evaluacion_id, $texto_pregunta, $orden + 1);
+
+                    // Opciones para esta pregunta
+                    $opciones_pregunta = $opciones[$orden];
+                    foreach ($opciones_pregunta as $idx_opcion => $texto_opcion) {
+                        if (!empty($texto_opcion)) {
+                            // ¿Es esta la opción correcta para esta pregunta?
+                            $es_correcta = ($correctas[$orden] == $idx_opcion) ? 1 : 0;
+                            $this->modeloCursos->crearOpcion($pregunta_id, $texto_opcion, $es_correcta);
+                        }
+                    }
+                }
+            }
+
+            $_SESSION['mensaje'] = "Evaluación guardada con éxito.";
+            // Necesitamos el ID del curso para redirigir correctamente
+            $fase_info = $this->modeloCursos->getFasePorId($fase_id);
+            header('Location: index.php?c=profesor&a=gestionarCurso&id=' . $fase_info['curso_id']);
+            exit();
+        }
+    }      
+    
     /**
      * NUEVO: Procesa la eliminación de un recurso.
      */

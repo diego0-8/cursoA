@@ -292,7 +292,12 @@ class ModeloAdmin {
         return (int)$consulta->fetchColumn();
     }
 
+    /**
+     * CORRECCIÓN DEFINITIVA: Obtiene los estudiantes de un curso y luego calcula
+     * el progreso y las evaluaciones por separado para evitar errores de subconsultas complejas.
+     */
     public function getEstudiantesPorCursoPaginados($curso_id, $busqueda = '', $filtro_estado = '', $limite = 10, $offset = 0) {
+        // Paso 1: Obtener la lista principal de estudiantes inscritos en el curso.
         $sql = "SELECT 
                     u.numero_documento,
                     u.tipo_documento,
@@ -300,9 +305,12 @@ class ModeloAdmin {
                     u.email,
                     i.fecha_inscripcion,
                     i.estado_inscripcion
-                FROM inscripciones i
-                JOIN usuarios u ON i.estudiante_numero_documento = u.numero_documento
-                WHERE i.curso_id = :curso_id";
+                FROM 
+                    usuarios u
+                JOIN 
+                    inscripciones i ON u.numero_documento = i.estudiante_numero_documento AND u.tipo_documento = i.estudiante_tipo_documento
+                WHERE 
+                    i.curso_id = :curso_id";
 
         $params = [':curso_id' => $curso_id];
 
@@ -326,7 +334,33 @@ class ModeloAdmin {
         $consulta->bindParam(':offset', $offset, PDO::PARAM_INT);
 
         $consulta->execute();
-        return $consulta->fetchAll(PDO::FETCH_ASSOC);
+        $estudiantes = $consulta->fetchAll(PDO::FETCH_ASSOC);
+
+        // Paso 2: Obtener el total de clases del curso una sola vez.
+        $sql_total_clases = "SELECT COUNT(cl.id) FROM clases cl JOIN fases f ON cl.fase_id = f.id WHERE f.curso_id = :curso_id";
+        $q_total_clases = $this->db->prepare($sql_total_clases);
+        $q_total_clases->execute([':curso_id' => $curso_id]);
+        $total_clases_curso = $q_total_clases->fetchColumn();
+
+        // Paso 3: Para cada estudiante, obtener su progreso y promedio de evaluaciones.
+        foreach ($estudiantes as $key => $estudiante) {
+            // Añadir total de clases
+            $estudiantes[$key]['total_clases'] = $total_clases_curso;
+
+            // Obtener clases completadas
+            $sql_progreso = "SELECT COUNT(pe.id) FROM progreso_estudiante pe JOIN clases cl ON pe.clase_id = cl.id JOIN fases f ON cl.fase_id = f.id WHERE f.curso_id = :curso_id AND pe.estudiante_numero_documento = :num_doc AND pe.completado = 1";
+            $q_progreso = $this->db->prepare($sql_progreso);
+            $q_progreso->execute([':curso_id' => $curso_id, ':num_doc' => $estudiante['numero_documento']]);
+            $estudiantes[$key]['clases_completadas'] = $q_progreso->fetchColumn();
+
+            // Obtener promedio de evaluaciones
+            $sql_eval = "SELECT AVG(max_puntaje) FROM (SELECT MAX(er.puntaje) as max_puntaje FROM evaluacion_resultados er JOIN evaluaciones e ON er.evaluacion_id = e.id JOIN fases f ON e.fase_id = f.id WHERE f.curso_id = :curso_id AND er.estudiante_numero_documento = :num_doc GROUP BY er.evaluacion_id) as mejores_puntajes";
+            $q_eval = $this->db->prepare($sql_eval);
+            $q_eval->execute([':curso_id' => $curso_id, ':num_doc' => $estudiante['numero_documento']]);
+            $estudiantes[$key]['promedio_evaluaciones'] = $q_eval->fetchColumn();
+        }
+
+        return $estudiantes;
     }
 
     public function aplicarAccionMasiva($curso_id, $estudiantes, $accion) {

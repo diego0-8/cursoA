@@ -12,9 +12,12 @@
         .bg-brand-dark-green { background-color: #1a3a3a; }
         .bg-brand-lime { background-color: #96c11f; }
         .text-brand-lime { color: #96c11f; }
+        .hover\:bg-brand-lime-dark:hover { background-color: #82a81b; }
         .sidebar-link { transition: background-color 0.2s, color 0.2s; }
         .sidebar-link:hover, .sidebar-link.active { background-color: #96c11f; color: #1a3a3a; }
         .sidebar-link.active i, .sidebar-link:hover i { color: #1a3a3a; }
+        .dashboard-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .dashboard-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -39,39 +42,45 @@
         <main class="flex-1 p-10 overflow-y-auto">
             <header class="mb-10">
                 <h1 class="text-3xl font-bold text-gray-800">Bienvenido, <?php echo htmlspecialchars(explode(' ', $_SESSION['usuario_nombre_completo'])[0]); ?></h1>
-                <p class="text-gray-500">Aquí tienes un resumen de tu actividad en la plataforma.</p>
+                <p class="text-gray-500">Aquí tienes un resumen de tus accesos directos en la plataforma.</p>
             </header>
 
             <!-- Tarjetas de Acceso Rápido -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <a href="index.php?c=profesor&a=listarCursos" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow flex items-center">
+                
+                <!-- Tarjeta 1: Gestionar Cursos y Evaluaciones -->
+                <a href="index.php?c=profesor&a=listarCursos" class="dashboard-card bg-white p-6 rounded-xl shadow-lg flex items-start">
                     <div class="bg-blue-100 text-blue-600 p-4 rounded-full mr-4">
-                        <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                        <i class="fas fa-edit fa-2x"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-gray-800">Mis Cursos</h3>
-                        <p class="text-gray-600 text-sm">Gestiona contenido y estudiantes.</p>
+                        <h3 class="text-xl font-bold text-gray-800">Gestionar Cursos</h3>
+                        <p class="text-gray-600 text-sm">Crea módulos, clases, recursos y evaluaciones.</p>
                     </div>
                 </a>
-                <a href="index.php?c=profesor&a=calificaciones" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow flex items-center">
+
+                <!-- Tarjeta 2: Calificar Entregas -->
+                <a href="index.php?c=profesor&a=calificaciones" class="dashboard-card bg-white p-6 rounded-xl shadow-lg flex items-start">
                     <div class="bg-green-100 text-green-600 p-4 rounded-full mr-4">
-                        <i class="fas fa-tasks fa-2x"></i>
+                        <i class="fas fa-marker fa-2x"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-gray-800">Calificaciones</h3>
-                        <p class="text-gray-600 text-sm">Revisa y califica las entregas.</p>
+                        <h3 class="text-xl font-bold text-gray-800">Calificar Entregas</h3>
+                        <p class="text-gray-600 text-sm">Revisa y califica los trabajos de los estudiantes.</p>
                     </div>
                 </a>
                 
-                <a href="index.php?c=profesor&a=verEstudiantes" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow flex items-center">
+                <!-- Tarjeta 3: Ver Progreso de Estudiantes -->
+                <a href="index.php?c=profesor&a=listarCursos" class="dashboard-card bg-white p-6 rounded-xl shadow-lg flex items-start">
                     <div class="bg-purple-100 text-purple-600 p-4 rounded-full mr-4">
-                        <i class="fas fa-user-graduate fa-2x"></i>
+                        <i class="fas fa-chart-line fa-2x"></i>
                     </div>
                     <div>
                         <h3 class="text-xl font-bold text-gray-800">Ver Estudiantes</h3>
-                        <p class="text-gray-600 text-sm">Consulta el progreso general.</p>
+                        <p class="text-gray-600 text-sm">Consulta el progreso y avance de los alumnos.</p>
                     </div>
                 </a>
+
             </div>
         </main>
     </div>
