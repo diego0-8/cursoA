@@ -91,7 +91,8 @@ class ModeloEstudiante {
         $sql = "SELECT 
                     cert.*,
                     c.nombre as nombre_curso,
-                    CONCAT(u.nombre, ' ', u.apellido) as nombre_estudiante
+                    CONCAT(u.nombre, ' ', u.apellido) as nombre_estudiante,
+                    u.numero_documento -- <-- ESTA ES LA LÍNEA AÑADIDA
                 FROM certificados cert
                 JOIN cursos c ON cert.curso_id = c.id
                 JOIN usuarios u ON cert.estudiante_numero_documento = u.numero_documento AND cert.estudiante_tipo_documento = u.tipo_documento

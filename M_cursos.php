@@ -249,6 +249,75 @@ class ModeloCursos {
         return $this->db->lastInsertId();
     }
 
+    public function getEstudiantesConProgresoCompletoPorCurso($curso_id) {
+        // Paso 1: Obtener la lista de estudiantes inscritos.
+        $sql = "SELECT 
+                    u.numero_documento,
+                    u.tipo_documento,
+                    CONCAT(u.nombre, ' ', u.apellido) as nombre_completo,
+                    u.email
+                FROM usuarios u
+                JOIN inscripciones i ON u.numero_documento = i.estudiante_numero_documento AND u.tipo_documento = i.estudiante_tipo_documento
+                WHERE i.curso_id = :curso_id AND i.estado_inscripcion = 'activa'
+                ORDER BY u.apellido, u.nombre";
+        
+        $consulta = $this->db->prepare($sql);
+        $consulta->execute([':curso_id' => $curso_id]);
+        $estudiantes = $consulta->fetchAll(PDO::FETCH_ASSOC);
+
+        // Paso 2: Obtener el total de clases del curso una sola vez.
+        $sql_total_clases = "SELECT COUNT(cl.id) FROM clases cl JOIN fases f ON cl.fase_id = f.id WHERE f.curso_id = :curso_id";
+        $q_total_clases = $this->db->prepare($sql_total_clases);
+        $q_total_clases->execute([':curso_id' => $curso_id]);
+        $total_clases_curso = $q_total_clases->fetchColumn();
+
+        // Paso 3: Para cada estudiante, obtener sus datos de progreso.
+        foreach ($estudiantes as $key => $estudiante) {
+            $estudiantes[$key]['total_clases'] = $total_clases_curso;
+
+            // Clases completadas
+            $sql_progreso = "SELECT COUNT(pe.id) FROM progreso_estudiante pe JOIN clases cl ON pe.clase_id = cl.id JOIN fases f ON cl.fase_id = f.id WHERE f.curso_id = :curso_id AND pe.estudiante_numero_documento = :num_doc AND pe.completado = 1";
+            $q_progreso = $this->db->prepare($sql_progreso);
+            $q_progreso->execute([':curso_id' => $curso_id, ':num_doc' => $estudiante['numero_documento']]);
+            $estudiantes[$key]['clases_completadas'] = $q_progreso->fetchColumn();
+
+            // Promedio de evaluaciones
+            $sql_eval = "SELECT AVG(max_puntaje) FROM (SELECT MAX(er.puntaje) as max_puntaje FROM evaluacion_resultados er JOIN evaluaciones e ON er.evaluacion_id = e.id JOIN fases f ON e.fase_id = f.id WHERE f.curso_id = :curso_id AND er.estudiante_numero_documento = :num_doc GROUP BY er.evaluacion_id) as mejores_puntajes";
+            $q_eval = $this->db->prepare($sql_eval);
+            $q_eval->execute([':curso_id' => $curso_id, ':num_doc' => $estudiante['numero_documento']]);
+            $estudiantes[$key]['promedio_evaluaciones'] = $q_eval->fetchColumn();
+            
+            // Observaciones del profesor
+            $estudiantes[$key]['observaciones'] = $this->getObservacionesPorEstudiante($curso_id, $estudiante['numero_documento']);
+        }
+
+        return $estudiantes;
+    }
+
+    /**
+     * NUEVO: Obtiene las observaciones de un profesor para un estudiante en un curso.
+     */
+    public function getObservacionesPorEstudiante($curso_id, $estudiante_num_doc) {
+        $sql = "SELECT o.*, CONCAT(u.nombre, ' ', u.apellido) as nombre_profesor
+                FROM profesor_observaciones o
+                JOIN usuarios u ON o.profesor_numero_documento = u.numero_documento AND o.profesor_tipo_documento = u.tipo_documento
+                WHERE o.curso_id = :curso_id AND o.estudiante_numero_documento = :est_num_doc
+                ORDER BY o.fecha_creacion DESC";
+        $consulta = $this->db->prepare($sql);
+        $consulta->execute([':curso_id' => $curso_id, ':est_num_doc' => $estudiante_num_doc]);
+        return $consulta->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * NUEVO: Guarda una nueva observación del profesor en la base de datos.
+     */
+    public function guardarObservacion($datos) {
+        $sql = "INSERT INTO profesor_observaciones (curso_id, estudiante_tipo_documento, estudiante_numero_documento, profesor_tipo_documento, profesor_numero_documento, observacion)
+                VALUES (:curso_id, :est_tipo_doc, :est_num_doc, :prof_tipo_doc, :prof_num_doc, :observacion)";
+        $consulta = $this->db->prepare($sql);
+        return $consulta->execute($datos);
+    }
+
     /**
      * Crea una opción para una pregunta.
      */

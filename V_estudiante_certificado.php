@@ -3,68 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($data['titulo']); ?></title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title><?php echo htmlspecialchars($data['titulo'] ?? 'Certificado'); ?></title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <style>
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #certificate-container, #certificate-container * {
-                visibility: visible;
-            }
-            #certificate-container {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
-            .no-print {
-                display: none;
-            }
-        }
-        .font-playfair { font-family: 'Playfair Display', serif; }
-    </style>
+    
+    <!-- Enlace a la hoja de estilos del certificado -->
+    <link rel="stylesheet" href="views/css/certificado_estilo.css">
 </head>
-<body class="bg-gray-200">
+<body>
 
-    <div class="no-print container mx-auto p-4 text-center">
-        <a href="index.php?c=estudiante&a=misCursos" class="inline-block bg-gray-600 text-white font-bold py-2 px-4 rounded hover:bg-gray-700 transition-colors mr-3">
-            <i class="fas fa-arrow-left mr-2"></i>Volver a Mis Cursos
+    <div class="no-print" style="text-align: center; padding: 1rem;">
+        <a href="index.php?c=estudiante&a=misCursos" style="display: inline-block; background-color: #555; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; margin-right: 10px;">
+            <i class="fas fa-arrow-left"></i> Volver a Mis Cursos
         </a>
-        <button onclick="window.print()" class="bg-brand-lime text-white font-bold py-2 px-4 rounded hover:bg-brand-lime-dark transition-colors">
-            <i class="fas fa-print mr-2"></i>Imprimir / Guardar como PDF
+        <button onclick="window.print()" style="background-color: #8BC34A; color: white; padding: 10px 15px; border-radius: 5px; border: none; cursor: pointer;">
+            <i class="fas fa-print"></i> Imprimir / Guardar como PDF
         </button>
     </div>
 
-    <div id="certificate-container" class="container mx-auto my-10 p-10 bg-white max-w-4xl shadow-2xl">
-        <div class="border-4 border-brand-dark-green p-8 relative">
-            <div class="text-center">
-                <h1 class="font-playfair text-5xl text-brand-dark-green">Certificado de Finalización</h1>
-                <p class="text-lg mt-4 text-gray-600">Se otorga a</p>
-                <p class="font-playfair text-4xl mt-6 text-brand-lime"><?php echo htmlspecialchars($data['certificado']['nombre_estudiante']); ?></p>
-                <div class="w-1/4 h-0.5 bg-gray-300 mx-auto my-6"></div>
-                <p class="text-lg text-gray-600">Por haber completado satisfactoriamente el curso</p>
-                <h2 class="font-playfair text-3xl mt-4 text-gray-800">"<?php echo htmlspecialchars($data['certificado']['nombre_curso']); ?>"</h2>
-            </div>
-            
-            <div class="flex justify-between items-end mt-16">
-                <div class="text-left">
-                    <p class="text-sm text-gray-500">Fecha de Emisión</p>
-                    <p class="font-bold text-gray-700"><?php echo date("d/m/Y", strtotime($data['certificado']['fecha_emision'])); ?></p>
-                </div>
-                <div class="text-center">
-                    <p class="font-bold text-brand-dark-green border-t-2 border-gray-400 px-8 pt-2">Firma Autorizada</p>
-                    <p class="text-sm text-gray-600">Vertical Safe</p>
-                </div>
-            </div>
+    <!-- Contenedor principal del certificado -->
+    <div id="certificate-container" style="margin: 2rem auto;">
+        
+        <!-- Contenido del certificado -->
+        <div class="certificate-content">
+            <header class="certificate-header">
+                <img src="../img/Frame 2.png" alt="Logo Vertical Safe">
+            </header>
 
-            <div class="absolute bottom-4 right-4 text-right text-xs text-gray-400">
-                <p>Código de Verificación:</p>
-                <p><?php echo htmlspecialchars($data['certificado']['codigo_unico']); ?></p>
-            </div>
+            <main class="certificate-body">
+                <p class="company-name">CADENA MONSALVE SAS</p>
+                <p class="certifies-text">CERTIFICA QUE</p>
+                
+                <h1 class="student-name">
+                    <?php echo htmlspecialchars(strtoupper($data['certificado']['nombre_estudiante'] ?? 'NOMBRE DEL ESTUDIANTE')); ?>
+                </h1>
+                
+                <p class="student-id">
+                    Cédula: <?php echo htmlspecialchars($data['certificado']['numero_documento'] ?? '00000000'); ?>
+                </p>
+
+                <p class="main-text">
+                    ES PERSONA COMPETENTE PARA REVISIÓN E INSPECCIÓN DE LOS EQUIPOS DE PROTECCIÓN CONTRA CAÍDAS DE LA MARCA VERTICAL SAFE
+                </p>
+            </main>
+
+            <footer class="certificate-footer">
+                <div class="signature-area">
+                    <p class="signature-font">Marcela Monsalve</p>
+                    <div class="signature-line">
+                        <p class="signer-name">MARCELA MONSALVE</p>
+                        <p class="signer-title">GERENTE GENERAL</p>
+                    </div>
+                </div>
+            </footer>
         </div>
     </div>
 

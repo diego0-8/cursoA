@@ -1,0 +1,53 @@
+/*
+ * Hoja de estilos para el Dashboard del Administrador
+ */
+
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0; /* Es una buena práctica reiniciar el margen del body */
+}
+
+/* --- ESTILOS DE LA BARRA LATERAL (Sidebar) --- */
+
+.bg-brand-dark-green {
+    background-color: #1a3a3a;
+}
+
+.bg-brand-lime {
+    background-color: #96c11f;
+}
+
+.text-brand-lime {
+    color: #96c11f;
+}
+
+.sidebar-link {
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+    background-color: #96c11f;
+    color: #1a3a3a;
+}
+
+.sidebar-link.active i,
+.sidebar-link:hover i {
+    color: #1a3a3a;
+}
+
+
+/* --- ESTILOS DEL CONTENIDO PRINCIPAL --- */
+
+/*
+ * Clase para el fondo de patrón del contenido principal.
+ *
+ * RUTA CORREGIDA: Ahora sube dos niveles desde 'views/css/' para
+ * llegar a la raíz y luego entrar a la carpeta 'img'.
+ */
+.main-content-bg {
+   background-image: url('../../img/Frame-1.png');
+   background-repeat: repeat;
+   background-size: auto;
+   background-attachment: fixed; /* Opcional: Fija el fondo para que no se desplace con el contenido. */
+}

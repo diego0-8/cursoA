@@ -1,0 +1,43 @@
+/*
+ * Hoja de estilos para las vistas de Estudiante
+ */
+
+body {
+    font-family: 'Inter', sans-serif;
+    /*
+     * RUTA: Sube dos niveles desde 'views/css/' para
+     * llegar a la raíz y luego entrar a la carpeta 'img'.
+     */
+    background-image: url('../../img/Frame-1.png');
+    background-repeat: repeat;
+    background-size: auto;
+    background-attachment: fixed;
+}
+
+/* --- ESTILOS PARA EL CERTIFICADO --- */
+.font-playfair {
+    font-family: 'Playfair Display', serif;
+}
+
+/* Estilos para la impresión del certificado */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #certificate-container, #certificate-container * {
+        visibility: visible;
+    }
+    #certificate-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border: none;
+    }
+    .no-print {
+        display: none;
+    }
+}

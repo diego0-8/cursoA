@@ -1,0 +1,159 @@
+/*
+ * Hoja de estilos para el Certificado de Estudiante v5
+ * Contenido ajustado para no salirse de la imagen de fondo.
+ */
+
+/* --- Estilos Generales --- */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #e9e9e9;
+    color: #1c1c1c;
+}
+
+#certificate-container {
+    background-image: url('../../img/Frame\ 3.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: white;
+    
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    max-width: 840px;
+    min-height: 595px;
+    display: flex;
+    flex-direction: column;
+    /* CAMBIO PRINCIPAL: Se aumenta el padding para alejar el texto de los bordes */
+    padding: 3rem 5rem; 
+    position: relative;
+}
+
+.certificate-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* --- Encabezado --- */
+.certificate-header {
+    text-align: center;
+    margin-bottom: 1.5rem; /* Se reduce un poco el margen */
+    margin-top: 26px;
+}
+
+.certificate-header img {
+    width: 180px; /* Se reduce un poco el logo */
+    height: auto;
+    margin-top: 10px;
+}
+
+/* --- Cuerpo Principal --- */
+.certificate-body {
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.certificate-body .company-name,
+.certificate-body .certifies-text,
+.certificate-body .signer-title,
+.certificate-body .signer-name {
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #000;
+}
+
+.certificate-body .company-name {
+    font-size: 1.1rem; /* Se reduce un poco */
+}
+
+.certificate-body .certifies-text {
+    font-size: 1.2rem; /* Se reduce un poco */
+    margin-top: 0.5rem;
+}
+
+.certificate-body .student-name {
+    font-size: 2.2rem; /* Se reduce un poco */
+    font-weight: 700;
+    color: #000;
+    margin: 0.2rem 0 0.25rem 0;
+    text-transform: uppercase;
+}
+
+.certificate-body .student-id {
+    font-size: 1.3rem; /* Se reduce un poco */
+    font-weight: 700;
+    color: #080808;
+}
+
+.certificate-body .main-text {
+    font-size: 0.85rem; /* Se reduce un poco */
+    font-weight: 500;
+    max-width: 85%; /* Se reduce el ancho máximo */
+    margin: 10px auto;
+    line-height: 1.6;
+    text-transform: uppercase;
+    color: #333;
+}
+
+/* --- Pie de Página y Firma --- */
+.certificate-footer {
+    padding-top: 1.5rem;
+    text-align: center;
+    width: 260px;
+    margin: 0 auto;
+}
+
+.signature-font {
+    font-family: 'Brush Script MT', 'Snell Roundhand', cursive;
+    font-size: 2.5rem; /* Se reduce un poco */
+    line-height: 1;
+    color: #333;
+    margin-top: -5px;
+}
+
+.signature-line {
+    border-top: 1px solid #333;
+    padding-top: 0.5rem;
+    margin-top: -15px;
+}
+
+.signature-line .signer-name {
+    font-size: 0.9rem; /* Se reduce un poco */
+}
+
+.signature-line .signer-title {
+    font-size: 0.8rem; /* Se reduce un poco */
+    color: #555;
+}
+
+/* --- Estilos para Impresión --- */
+@media print {
+    body {
+        background-color: white;
+    }
+    .no-print {
+        display: none;
+    }
+    #certificate-container {
+        box-shadow: none;
+        margin: 0;
+        max-width: 100%;
+        border: none;
+        padding: 2.5rem 3.5rem;
+        
+        /* --- ESTA ES LA REGLA AÑADIDA --- */
+        /* Fuerza la impresión de fondos en navegadores WebKit (Chrome, Safari, Edge) */
+        -webkit-print-color-adjust: exact; 
+        /* Propiedad estándar para forzar la impresión de fondos */
+        print-color-adjust: exact;
+    }
+
+    
+}
