@@ -30,6 +30,7 @@
                 <a href="index.php?c=admin&a=gestionarUsuarios" class="sidebar-link flex items-center py-2.5 px-4 rounded-lg"><i class="fas fa-users fa-fw mr-3"></i>Usuarios</a>
                 <a href="index.php?c=admin&a=gestionarCursos" class="sidebar-link flex items-center py-2.5 px-4 rounded-lg"><i class="fas fa-book-open fa-fw mr-3"></i>Cursos</a>
                 <a href="index.php?c=admin&a=gestionarInscripciones" class="sidebar-link flex items-center py-2.5 px-4 rounded-lg"><i class="fas fa-clipboard-check fa-fw mr-3"></i>Inscripciones</a>
+                <button class="">rojito</button>
             </nav>
             <div class="mt-auto">
                  <a href="index.php?c=login&a=logout" class="sidebar-link flex items-center py-2.5 px-4 rounded-lg text-red-400 hover:bg-red-500 hover:text-white transition-colors"><i class="fas fa-sign-out-alt fa-fw mr-3"></i>Cerrar Sesión</a>

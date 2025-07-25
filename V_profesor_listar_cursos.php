@@ -7,19 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .bg-brand-dark-green { background-color: #1a3a3a; }
-        .bg-brand-lime { background-color: #96c11f; }
-        .text-brand-lime { color: #96c11f; }
-        .sidebar-link { transition: background-color 0.2s, color 0.2s; }
-        .sidebar-link:hover, .sidebar-link.active { background-color: #96c11f; color: #1a3a3a; }
-        .sidebar-link.active i, .sidebar-link:hover i { color: #1a3a3a; }
-        .course-card { transition: transform 0.2s, box-shadow 0.2s; }
-        .course-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-    </style>
+    <!-- Vinculando la hoja de estilos del profesor -->
+    <link rel="stylesheet" href="views/css/profesor.css">
 </head>
-<body class="bg-gray-100">
+<body>
     <div class="flex h-screen">
         <!-- Barra Lateral -->
         <aside class="w-64 bg-brand-dark-green text-white flex flex-col p-4">
@@ -39,7 +30,7 @@
 
         <!-- Contenido Principal -->
         <main class="flex-1 p-10 overflow-y-auto">
-            <header class="mb-8">
+            <header class="mb-8 bg-white/80 backdrop-blur-sm p-6 rounded-lg">
                 <h1 class="text-3xl font-bold text-gray-800">Mis Cursos</h1>
                 <p class="text-gray-500">Gestiona el contenido, los estudiantes y las calificaciones de tus cursos asignados.</p>
             </header>

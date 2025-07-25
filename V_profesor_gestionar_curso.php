@@ -7,18 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .bg-brand-dark-green { background-color: #1a3a3a; }
-        .bg-brand-lime { background-color: #96c11f; }
-        .text-brand-lime { color: #96c11f; }
-        .hover\:bg-brand-lime-dark:hover { background-color: #82a81b; }
-        .sidebar-link { transition: background-color 0.2s, color 0.2s; }
-        .sidebar-link:hover, .sidebar-link.active { background-color: #96c11f; color: #1a3a3a; }
-        .sidebar-link.active i, .sidebar-link:hover i { color: #1a3a3a; }
-    </style>
+    <!-- Vinculando la hoja de estilos del profesor -->
+    <link rel="stylesheet" href="views/css/profesor.css">
 </head>
-<body class="bg-gray-100">
+<body>
     <div class="flex h-screen">
         <!-- Barra Lateral -->
         <aside class="w-64 bg-brand-dark-green text-white flex flex-col p-4">
@@ -38,7 +30,7 @@
 
         <!-- Contenido Principal -->
         <main class="flex-1 p-10 overflow-y-auto">
-            <header class="flex justify-between items-center mb-8">
+            <header class="flex justify-between items-center mb-8 bg-white/80 backdrop-blur-sm p-6 rounded-lg">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">Gestionar: <?php echo htmlspecialchars($data['curso']['nombre']); ?></h1>
                     <p class="text-gray-500">Añade módulos, clases y recursos para tu curso.</p>
@@ -104,7 +96,6 @@
                                                 <?php endforeach; ?>
                                             </ul>
                                         <?php endif; ?>
-                                        <!-- CAMBIO: Se eliminó el formulario de enlace a Google Forms por clase para evitar redundancia -->
                                     </div>
                                 <?php endforeach; ?>
                             <?php endif; ?>

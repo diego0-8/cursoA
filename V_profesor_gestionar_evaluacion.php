@@ -7,16 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .bg-brand-dark-green { background-color: #1a3a3a; }
-        .bg-brand-lime { background-color: #96c11f; }
-        .text-brand-lime { color: #96c11f; }
-    </style>
+    <!-- Vinculando la hoja de estilos del profesor -->
+    <link rel="stylesheet" href="views/css/profesor.css">
 </head>
-<body class="bg-gray-100">
+<body>
     <div class="container mx-auto p-10">
-        <header class="flex justify-between items-center mb-8">
+        <header class="flex justify-between items-center mb-8 bg-white/80 backdrop-blur-sm p-6 rounded-lg">
             <div>
                 <h1 class="text-3xl font-bold text-gray-800">Gestionar Evaluación</h1>
                 <p class="text-gray-500">Módulo: <?php echo htmlspecialchars($data['fase_info']['nombre']); ?> (Curso: <?php echo htmlspecialchars($data['curso_info']['nombre']); ?>)</p>

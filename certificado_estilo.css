@@ -45,9 +45,10 @@ body {
 }
 
 .certificate-header img {
-    width: 180px; /* Se reduce un poco el logo */
+    width: 313px;
     height: auto;
     margin-top: 10px;
+    margin-bottom: -44px;
 }
 
 /* --- Cuerpo Principal --- */
@@ -89,7 +90,7 @@ body {
 .certificate-body .student-id {
     font-size: 1.3rem; /* Se reduce un poco */
     font-weight: 700;
-    color: #080808;
+    color: #030303;
 }
 
 .certificate-body .main-text {

@@ -84,10 +84,14 @@ Aquí aprenderás a: <br>
                         <input type="password" name="password" id="password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none border-brand-lime">
                     </div>
                     
-                    <div class="text-right text-sm">
+                    
+                    <!-- CAMBIO: Se añade el botón de consulta -->
+                    <div class="flex justify-between items-center text-sm">
+                        <a href="index.php?c=publico" class="font-medium text-gray-600 hover:text-brand-lime">
+                            <i class="fas fa-search"></i> Consultar Certificado
+                        </a>
                         <a href="index.php?c=usuarios&a=recuperar" class="font-medium text-brand-lime hover:underline">¿Olvidaste tu contraseña?</a>
                     </div>
-
                     <div>
                         <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-bold text-white bg-brand-lime hover:bg-brand-lime-dark focus:outline-none">
                             Ingresar

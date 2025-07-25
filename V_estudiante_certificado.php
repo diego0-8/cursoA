@@ -30,7 +30,7 @@
         <!-- Contenido del certificado -->
         <div class="certificate-content">
             <header class="certificate-header">
-                <img src="../img/Frame 2.png" alt="Logo Vertical Safe">
+                <img src="../img/Frame-2.png" alt="hola">                
             </header>
 
             <main class="certificate-body">

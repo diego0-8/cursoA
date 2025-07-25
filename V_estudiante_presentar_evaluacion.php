@@ -6,13 +6,16 @@
     <title><?php echo htmlspecialchars($data['titulo']); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-    <style> body { font-family: 'Inter', sans-serif; } </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Vinculando la hoja de estilos del estudiante -->
+    <link rel="stylesheet" href="views/css/estudiante.css">
 </head>
-<body class="bg-gray-100">
+<!-- La clase del body ahora se controla desde estudiante.css -->
+<body>
     <div class="container mx-auto p-10 max-w-4xl">
-        <header class="text-center mb-8">
+        <header class="text-center mb-8 bg-white/80 backdrop-blur-sm p-6 rounded-lg">
             <h1 class="text-3xl font-bold text-gray-800"><?php echo htmlspecialchars($data['titulo']); ?></h1>
-            <p class="text-gray-500">Selecciona la respuesta correcta para cada pregunta.</p>
+            <p class="text-gray-600">Selecciona la respuesta correcta para cada pregunta.</p>
         </header>
 
         <form action="index.php?c=estudiante&a=enviarEvaluacion" method="POST">
@@ -28,7 +31,7 @@
                                 <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
                                     <input type="radio" name="respuestas[<?php echo $pregunta['id']; ?>]" value="<?php echo $opcion['id']; ?>" required class="h-4 w-4 text-lime-600 border-gray-300 focus:ring-lime-500">
                                     <span class="ml-3 text-gray-700"><?php echo htmlspecialchars($opcion['texto']); ?></span>
-                                </label>
+                                 </label>
                             <?php endforeach; ?>
                         </div>
                     </fieldset>
@@ -36,7 +39,7 @@
             </div>
 
             <div class="mt-8 text-center">
-                <button type="submit" class="bg-lime-600 hover:bg-lime-700 text-white font-bold py-3 px-10 rounded-lg text-lg">
+                <button type="submit" class="bg-lime-600 hover:bg-lime-700 text-white font-bold py-3 px-10 rounded-lg text-lg shadow-lg hover:shadow-xl transition-shadow">
                     <i class="fas fa-paper-plane mr-2"></i>Enviar Respuestas
                 </button>
             </div>

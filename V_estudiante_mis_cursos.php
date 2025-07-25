@@ -7,8 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Vinculando la hoja de estilos del estudiante -->
+    <link rel="stylesheet" href="views/css/estudiante.css">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        /* Estilos específicos que no están en el CSS general */
         .bg-brand-dark-green { background-color: #1a3a3a; }
         .bg-brand-lime { background-color: #96c11f; }
         .text-brand-lime { color: #96c11f; }
@@ -17,7 +19,7 @@
         .header-link:hover { color: #96c11f; }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
     <!-- Header y Navegación -->
     <header class="bg-white shadow-md sticky top-0 z-20">
         <div class="container mx-auto px-6 py-4">
@@ -39,7 +41,7 @@
     </header>
 
     <main class="container mx-auto px-6 py-10">
-        <header class="mb-8">
+        <header class="mb-8 bg-white/80 backdrop-blur-sm p-6 rounded-lg">
             <h1 class="text-3xl font-bold text-gray-800">Mis Cursos Inscritos</h1>
             <p class="text-gray-500">Continúa tu aprendizaje y completa tus certificaciones.</p>
         </header>
