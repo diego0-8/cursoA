@@ -121,6 +121,54 @@ class ModeloUsuarios {
         $consulta->execute();
         return $consulta->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Obtiene usuarios para un reporte, filtrando por rango de fechas y roles.
+     */
+    public function getUsuariosParaReporte($fecha_inicio, $fecha_fin, $roles) {
+        // Asegurarse de que el array de roles no esté vacío para la consulta IN
+        if (empty($roles)) {
+            return [];
+        }
+
+        $sql = "SELECT * FROM usuarios WHERE 1=1";
+        // CORRECCIÓN: Se usará un array para los parámetros posicionales (?)
+        $params = [];
+
+        if (!empty($fecha_inicio)) {
+            // CORRECCIÓN: Se cambia el marcador nombrado por uno posicional
+            $sql .= " AND DATE(fecha_creacion) >= ?";
+            $params[] = $fecha_inicio;
+        }
+
+        if (!empty($fecha_fin)) {
+            // CORRECCIÓN: Se cambia el marcador nombrado por uno posicional
+            $sql .= " AND DATE(fecha_creacion) <= ?";
+            $params[] = $fecha_fin;
+        }
+
+        // Crear placeholders para la cláusula IN (...) de roles
+        $placeholders = implode(',', array_fill(0, count($roles), '?'));
+        $sql .= " AND rol IN ($placeholders)";
+        
+        $sql .= " ORDER BY rol, fecha_creacion DESC";
+
+        $consulta = $this->db->prepare($sql);
+        
+        // CORRECCIÓN: Se unen los parámetros de fecha con los de roles en un solo array
+        $execute_params = array_merge($params, $roles);
+
+        $consulta->execute($execute_params);
+        $resultados = $consulta->fetchAll(PDO::FETCH_ASSOC);
+
+        // Agrupar los resultados por rol para facilitar la creación de tablas
+        $usuarios_agrupados = [];
+        foreach ($resultados as $usuario) {
+            $usuarios_agrupados[$usuario['rol']][] = $usuario;
+        }
+        return $usuarios_agrupados;
+    }
+
     public function crearUsuarioDesdeAdmin($datos) {
         try {
             // Se añade la columna 'telefono' a la consulta INSERT

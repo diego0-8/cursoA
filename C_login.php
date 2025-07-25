@@ -28,6 +28,10 @@ class ControladorLogin {
             case 'estudiante':
                 header('Location: index.php?c=estudiante');
                 break;
+            // REVISIÓN: La lógica para el auditor es correcta.
+            case 'auditor':
+                header('Location: index.php?c=auditor');
+                break; // Se añade el break para seguir buenas prácticas
             default:
                 header('Location: index.php?c=login');
                 break;
